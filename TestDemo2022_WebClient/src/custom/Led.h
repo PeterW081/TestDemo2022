@@ -5,7 +5,7 @@
 
 namespace project::Led
 {
-	inline QString HttpApiHost			   = "http://192.168.1.1:8080";
+	inline QString HttpApiHost			   = "http://test_server:8080";
 	inline QString HttpApi_Led04_read	   = HttpApiHost + "/led04";
 	inline QString HttpApi_Led04_write_on  = HttpApiHost + "/led04/on";
 	inline QString HttpApi_Led04_write_off = HttpApiHost + "/led04/off";
