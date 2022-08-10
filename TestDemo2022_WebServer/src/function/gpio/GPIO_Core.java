@@ -12,10 +12,19 @@ public abstract class GPIO_Core implements GPIO_Define
 			System.load(libPath);
 			env_init();
 		}
+		private static void force_load() {};
 		private static native void   env_init();
 		private static native void   pin_init(int pin_number, int pin_mode);
 		private static native int    pin_read(int pin_number);
 		private static native void   pin_write(int pin_number, int value);		
+	}
+	public static void force_load()
+	{
+		try {
+			Jni.force_load();			
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
 	}
 	protected static void pin_init(Pin pin_number, PinMode pin_mode)
 	{
