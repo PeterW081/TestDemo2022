@@ -10,11 +10,30 @@
  */
 JNIEXPORT void JNICALL Java_function_gpio_GPIO_1Core_00024Jni_env_1init(JNIEnv*, jclass)
 {
+	// Thanks: https://github.com/mattjlewis/pigpioj/blob/214aa8827febf17464f99cda7d19906dd5dda352/pigpioj-native/src/main/native/uk_pigpioj_PigpioGpio.c
 	static bool isNeedInit = true;
 	if (isNeedInit)
 	{
-		int status = gpioInitialise();
-		if (gpioInitialise() < 0)
+		try
+		{
+			int status;
+			status = gpioCfgSetInternals(gpioCfgGetInternals() | PI_CFG_NOSIGHANDLER);
+			if (status < 0)
+			{
+				throw status;
+			}
+			status = gpioCfgInterfaces(PI_DISABLE_FIFO_IF | PI_DISABLE_SOCK_IF);
+			if (status < 0)
+			{
+				throw status;
+			}
+			status = gpioInitialise();
+			if (status < 0)
+			{
+				throw status;
+			}
+		}
+		catch (int status)
 		{
 			std::cerr << "pigpio initialisation failed." << std::endl;
 			std::cerr << "pigpio initialisation status is " << status << "." << std::endl;

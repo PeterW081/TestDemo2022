@@ -11,9 +11,39 @@ namespace Define::Form
 	// clang-format on
 }
 
+Define::Form::TupleClass_WidgetStyle_lab_status extern inline convert_EnumStatus_WidgetStyle(Led::EnumStatus status)
+{
+	Define::Form::TupleClass_WidgetStyle_lab_status style;
+	switch (status)
+	{
+		case Led::EnumStatus::on:
+			style = Define::Form::case_on;
+			break;
+		case Led::EnumStatus::off:
+			style = Define::Form::case_off;
+			break;
+		default:
+			throw std::exception();
+	}
+	return style;
+}
+
+Define::Form::TupleClass_WidgetStyle_lab_status extern inline convert_XXX_WidgetStyle(std::function<Led::EnumStatus()> operate)
+{
+	try
+	{
+		return convert_EnumStatus_WidgetStyle(operate());
+	}
+	catch (...)
+	{
+		return Define::Form::case_error;
+	}
+}
+
 Form::Form(QWidget* parent)
 	: QWidget(parent)
 	, ui(new Ui::Form)
+	, led(new Led())
 {
 	ui->setupUi(this);
 	this->init();
@@ -28,6 +58,7 @@ Form::Form(QWidget* parent)
 Form::~Form()
 {
 	delete ui;
+	delete led;
 }
 
 void Form::init()
@@ -38,38 +69,28 @@ void Form::init()
 void Form::init_connect()
 {
 	auto ctrl_led = [this](Led::EnumStatus (Led::*operate)()) -> void {
+		auto func = []() -> Led::EnumStatus { return Led::EnumStatus::on; };
 		this->setDisabled(true);
-		//		this->refreshStatus(Define::Form::case_loding);
-		static Led led;
-		TupleClass_WidgetStyle_lab_status style;
-		try
-		{
-			switch ((led.*operate)())
-			{
-				case Led::EnumStatus::on:
-					style = Define::Form::case_on;
-					break;
-				case Led::EnumStatus::off:
-					style = Define::Form::case_off;
-					break;
-			}
-		}
-		catch (...)
-		{
-			style = Define::Form::case_error;
-		}
-		this->refreshStatus(style);
+		this->refreshStatus(convert_XXX_WidgetStyle(std::bind(operate, (this->led))));
 		this->setDisabled(false);
 	};
+	auto refreshStatus = [this](Led::EnumStatus status) -> void {
+		this->Form::refreshStatus(convert_EnumStatus_WidgetStyle(status));
+	};
+	auto refreshStatusError = std::bind(&Form::refreshStatus, this, Define::Form::case_error);
 	///
 	// clang-format off
 	this->connect(this, &Form::signal_refresh, this, std::bind(ctrl_led, &Led::get_status ));
 	this->connect(this, &Form::signal_led_on , this, std::bind(ctrl_led, &Led::set_on     ));
 	this->connect(this, &Form::signal_led_off, this, std::bind(ctrl_led, &Led::set_off    ));
 	// clang-format off
-	this->connect(this->ui->_btn01_on,   &QPushButton::clicked, this, &Form::signal_led_on  );
-	this->connect(this->ui->_btn02_off,  &QPushButton::clicked, this, &Form::signal_led_off );
-	this->connect(this->ui->_lab_status, &Label::clicked,       this, &Form::signal_refresh );
+	this->connect(this->ui->_btn01_on,   &QPushButton::clicked, this,      &Form::signal_led_on         );
+	this->connect(this->ui->_btn02_off,  &QPushButton::clicked, this,      &Form::signal_led_off        );
+	this->connect(this->ui->_lab_status, &Label::clicked,       this,      &Form::signal_refresh        );
+	this->connect(this->ui->_lab_status, &Label::clicked,       this->led, &Led::activate_daemon_status );
+	// clang-format off
+	this->connect(this->led, &Led::signal_OnStatus,      this, refreshStatus      );
+	this->connect(this->led, &Led::signal_OnStatusError, this, refreshStatusError );
 	// clang-format on
 }
 

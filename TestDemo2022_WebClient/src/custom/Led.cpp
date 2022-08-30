@@ -40,3 +40,38 @@ Led::EnumStatus Led::set(Led::EnumStatus status)
 	}
 	return convert_QString_EnumStatus(response);
 };
+
+void Led::slot_OnStatus(QString status)
+{
+	try
+	{
+		emit this->signal_OnStatus(convert_QString_EnumStatus(status));
+	}
+	catch (...)
+	{
+		emit this->signal_OnStatusError();
+	}
+}
+
+void Led::activate_daemon_status()
+{
+	if (this->daemon_status != nullptr && !this->daemon_status->isClose())
+	{
+		return;
+	} else
+	{
+		this->disActivate_daemon_status();
+	}
+	this->daemon_status = new WebSocketClient(this, this->WebSocket_Led04_read);
+	this->connect(this->daemon_status, &WebSocketClient::signal_onMessage, this, &Led::slot_OnStatus);
+};
+
+void Led::disActivate_daemon_status()
+{
+	if (this->daemon_status != nullptr)
+	{
+		this->daemon_status->close();
+		delete this->daemon_status;
+		this->daemon_status = nullptr;
+	}
+};

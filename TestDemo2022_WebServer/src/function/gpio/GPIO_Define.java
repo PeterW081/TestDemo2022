@@ -9,8 +9,9 @@ public interface GPIO_Define
 		Pin(int value)
 		{
 			this.v = value;
-		}	
+		}
 	}
+
 	public static enum PinMode
 	{
 		PI_OUTPUT(1);
@@ -18,8 +19,6 @@ public interface GPIO_Define
 		PinMode(int value)
 		{
 			this.v = value;
-		}	
+		}
 	}
 }
-
-

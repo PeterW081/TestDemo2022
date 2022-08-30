@@ -6,7 +6,7 @@ public abstract class GPIO_Core implements GPIO_Define
 {
 	private static class Jni
 	{
-		private static String libPath = Main.pathLibJniGpio;
+		private static String libPath = Main.jni_pathLibGpio;
 		static
 		{
 			System.load(libPath);

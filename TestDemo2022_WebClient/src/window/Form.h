@@ -31,13 +31,13 @@ class Form : public QWidget
   private:
 	Ui::Form* ui;
 
-  public:
-	void test();
-
   signals:
 	void signal_led_on();
 	void signal_led_off();
 	void signal_refresh();
+
+  private:
+	Led* led;
 
   private:
 	virtual void closeEvent(QCloseEvent*);

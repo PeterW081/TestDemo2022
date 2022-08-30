@@ -12,6 +12,7 @@ import function.gpio.GPIO_Func_Led;
 @Path("/led04")
 public class Led implements GPIO_Define
 {
+	static public final Led instance = new Led();
 	static private Pin pin_led = Pin.PIN04;
 	static
 	{
